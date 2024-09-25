@@ -1,13 +1,17 @@
-package cimport java.io.IOException;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.nt.dao.EmpDao;
 public class Update extends HttpServlet {
 	
 	protected void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -15,25 +19,18 @@ public class Update extends HttpServlet {
 		String code = req.getParameter( "t2" );
 		String name = req.getParameter( "t3" );
 		
-		try {
-			Class.forName( "com.mysql.cj.jdbc.Driver" );
+		EmpDao dao=new EmpDao();
+		boolean isUpdated=dao.updateSalary(id, name, code);
 
-			Connection con = DriverManager
-					.getConnection("jdbc:mysql://localhost:3306/movies", "root", "root");
-
-			PreparedStatement ps = con.prepareStatement( "update country set country_iso_code = ?,country_name = ? where country_id = ?" );
-			ps.setString( 1, code );
-			ps.setString(2, name);
-			ps.setInt( 3, id );
-			ps.executeUpdate();
-		} catch ( Exception e ) {
-			e.printStackTrace();
+		if(isUpdated) {
+			req.setAttribute("msg", "Salary updation Successfull");
+			RequestDispatcher rd=req.getRequestDispatcher("succes.jsp");
+			rd.forward(req, res);
+		} else {
+			req.setAttribute("errorMsg", "Salary updation failed");
+			RequestDispatcher rd=req.getRequestDispatcher("error.jsp");
+			rd.forward(req, res);
 		}
-		
-		res.setContentType("text/html");
-		PrintWriter pw = res.getWriter();
-		pw.write("<h3 style=color:'green'>updation Successfull</h3>");
-		pw.close();
 		
 	}
 
